@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v1.0.3"; // 🔥 PHẢI TRÙNG meta app-version
+const CACHE_VERSION = "v1.0.4"; // 🔥 PHẢI TRÙNG meta app-version
 const CACHE_PREFIX = "ww-material-calculator-";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
