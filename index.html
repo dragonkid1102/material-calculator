@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta name="app-version" content="1.0.4">
+<meta name="app-version" content="1.0.5">
 <!-- iOS PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -99,8 +99,8 @@ h2 {
    ========================================================= */
 .grid {
   display: grid;
-  grid-template-columns: 1fr;   /* MOBILE DEFAULT */
-  gap: 14px;
+  grid-template-columns: repeat(2, 1fr); /* MOBILE */
+  gap: 12px;
 }
 
 @media (min-width: 768px) {
@@ -320,9 +320,6 @@ button:hover {
 .hidden {
   display: none;
 }
-/* =========================================================
-   DESKTOP INPUT COMPACT (FASTER INPUT)
-   ========================================================= */
 
 /* =========================================================
    DESKTOP INPUT NARROW (KEEP HEIGHT, BETTER BALANCE)
@@ -340,22 +337,6 @@ button:hover {
 
   .grid {
     gap: 10px;
-  }
-}
-
-/* =========================================================
-   DESKTOP DENSER INPUT SPACING
-   ========================================================= */
-@media (min-width: 1024px) {
-
-  /* Kéo các ô lại gần nhau */
-  .grid {
-    gap: 10px;
-  }
-
-  /* Box không chiếm full chiều ngang */
-  .box {
-    justify-content: flex-start;
   }
 }
 
@@ -693,6 +674,23 @@ const version = document
 document.getElementById("app-version").innerText =
   `Phiên bản: v${version}`;
 
+/* =========================================================
+   KEYBOARD NAVIGATION (EXCEL-LIKE)
+   ========================================================= */
+(function enableKeyboardNavigation() {
+  const inputs = Array.from(document.querySelectorAll("input"));
+
+  inputs.forEach((input, index) => {
+    input.addEventListener("keydown", e => {
+
+      // ENTER → next input
+      if (e.key === "Enter") {
+        e.preventDefault();
+        inputs[index + 1]?.focus();
+      }
+    });
+  });
+})();
 
 </script>
 
