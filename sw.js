@@ -1,9 +1,7 @@
-/* ===== VERSION ===== */
-const CACHE_PREFIX = "ww-calculator-cache-";
-const CACHE_VERSION = "v1.0.1"; // ⬅️ ĐỔI KHI UPDATE
-const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
+const CACHE_VERSION = "v1.0.2"; // 🔥 PHẢI TRÙNG meta app-version
+const CACHE_PREFIX = "ww-material-calculator-";
+const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
-/* ===== FILE CACHE ===== */
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,15 +10,15 @@ const ASSETS = [
   "./icon-512.png"
 ];
 
-/* ===== INSTALL ===== */
+// Install
 self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  // ❌ KHÔNG skipWaiting ở đây
 });
 
-/* ===== ACTIVATE ===== */
+// Activate – dọn cache cũ
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -36,14 +34,19 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-/* ===== FETCH ===== */
+// Fetch
 self.addEventListener("fetch", event => {
+  if (event.request.url.includes("index.html")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(res => res || fetch(event.request))
   );
 });
 
-/* ===== UPDATE MESSAGE ===== */
+// Nhận lệnh update
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
