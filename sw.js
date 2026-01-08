@@ -1,6 +1,6 @@
 /* ===== VERSION ===== */
 const CACHE_PREFIX = "ww-calculator-cache-";
-const CACHE_VERSION = "v1.0.0"; // ⬅️ ĐỔI KHI UPDATE
+const CACHE_VERSION = "v1.0.1"; // ⬅️ ĐỔI KHI UPDATE
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 
 /* ===== FILE CACHE ===== */
