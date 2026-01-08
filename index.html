@@ -625,14 +625,16 @@ if ("serviceWorker" in navigator) {
 }
 
 function showUpdateBanner(reg) {
-  waitingSW = reg.waiting;
+  waitingSW = reg.waiting || reg.installing;
   document.getElementById("update-banner").classList.remove("hidden");
 }
 
 function applyUpdate() {
-  if (waitingSW) {
-    waitingSW.postMessage({ type: "SKIP_WAITING" });
+  if (!waitingSW) {
+    console.warn("⚠️ No waiting service worker");
+    return;
   }
+  waitingSW.postMessage({ type: "SKIP_WAITING" });
 }
 
 const DEFAULT_VALUES = {
