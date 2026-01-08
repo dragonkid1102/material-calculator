@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta name="app-version" content="1.0.0">
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WW Calculator">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22e3ff">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính Nguyên Liệu</title>
+
+<style>
+:root {
+    --bg-main:#050b18;
+    --panel:#081428;
+    --border:rgba(56,189,248,.2);
+    --text:#e5f3ff;
+    --sub:#9ccfff;
+    --accent:#22e3ff;
+
+    --gold:#ffd84d;
+    --purple:#b56cff;
+    --blue:#4aa3ff;
+    --green:#2fdc7b;
+
+    --ok:#2fdc7b;
+    --fail:#ff4d4d;
+    --extra:#ffd84d;
+}
+
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    padding:16px;
+    font-family:Inter,Segoe UI,system-ui,sans-serif;
+    background:radial-gradient(circle at top,#0b1a33,#020617 60%);
+    color:var(--text);
+}
+
+.container{max-width:980px;margin:auto}
+
+h2{
+    color:var(--accent);
+    letter-spacing:1px;
+    margin:20px 0 10px;
+}
+
+.section{
+    background:linear-gradient(180deg,#0c1e3a,#050b18);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 0 30px rgba(0,0,0,.6);
+}
+
+.sub-title{
+    margin-bottom:10px;
+    color:var(--sub);
+    font-weight:bold;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+}
+
+.box{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:13px;
+}
+
+input{
+    height:44px;
+    border-radius:999px;
+    border:none;
+    outline:none;
+    text-align:center;
+    font-size:16px;
+    font-weight:bold;
+    color:#000;
+}
+
+.gold{background:linear-gradient(135deg,#ffe27a,var(--gold))}
+.purple{background:linear-gradient(135deg,#d0a3ff,var(--purple))}
+.blue{background:linear-gradient(135deg,#8bc5ff,var(--blue))}
+.green{background:linear-gradient(135deg,#7dffb7,var(--green))}
+
+button{
+    height:56px;
+    width:100%;
+    border:none;
+    border-radius:999px;
+    font-size:18px;
+    font-weight:bold;
+    background:linear-gradient(135deg,#3dffb2,#22c55e);
+    cursor:pointer;
+    box-shadow:0 0 25px rgba(34,197,94,.7);
+}
+
+#result{margin-top:20px;line-height:1.8}
+
+.ok{color:var(--ok);font-weight:bold}
+.fail{color:var(--fail);font-weight:bold}
+.extra{color:var(--extra);font-weight:bold}
+
+@media(max-width:700px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+}
+/* ===== ANIMATION ===== */
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 rgba(34,227,255,0.0); }
+    50%  { box-shadow: 0 0 25px rgba(34,227,255,0.8); }
+    100% { box-shadow: 0 0 0 rgba(34,227,255,0.0); }
+}
+
+.animate {
+    animation: pulse 0.6s ease;
+}
+
+/* ===== PROGRESS ===== */
+#progress-wrap {
+    margin-top: 20px;
+}
+
+#progress-text {
+    margin-bottom: 6px;
+    color: #9ccfff;
+    font-weight: bold;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg,#22e3ff,#2fdc7b);
+    box-shadow: 0 0 15px rgba(34,227,255,0.8);
+    transition: width 0.4s ease;
+}
+
+.progress-fail {
+    background: linear-gradient(90deg,#ff4d4d,#ffae42) !important;
+    box-shadow: 0 0 15px rgba(255,77,77,0.8) !important;
+}
+
+/* ===== RIPPLE EFFECT ===== */
+button {
+    position: relative;
+    overflow: hidden;
+}
+
+button .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 600ms linear;
+    background: rgba(255,255,255,0.5);
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+.test-pass { color: #2fdc7b; font-weight: bold; }
+.test-fail { color: #ff4d4d; font-weight: bold; }
+.test-case { margin-bottom: 6px; }
+.hidden {
+    display: none;
+}
+/* ===== POLISH TEXT ===== */
+.sub-title {
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.box {
+    padding: 6px 4px;
+}
+
+input {
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+input:focus {
+    box-shadow: 0 0 18px rgba(34,227,255,0.8);
+    transform: scale(1.03);
+}
+.section {
+    backdrop-filter: blur(6px);
+    background: linear-gradient(
+        180deg,
+        rgba(20,35,70,0.92),
+        rgba(5,10,25,0.92)
+    );
+}
+button {
+    text-shadow: 0 0 6px rgba(255,255,255,0.6);
+}
+
+button:hover {
+    filter: brightness(1.08);
+}
+.ok::before {
+    content: "✔ ";
+    text-shadow: 0 0 10px #2fdc7b;
+}
+
+.fail::before {
+    content: "✖ ";
+    text-shadow: 0 0 10px #ff4d4d;
+}
+
+.extra::before {
+    content: "✦ ";
+    text-shadow: 0 0 10px #ffd84d;
+}
+/* ===== MATERIAL ICON ===== */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-right: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.icon.gold   { color:#ffd84d; }
+.icon.purple { color:#b56cff; }
+.icon.blue   { color:#4aa3ff; }
+.icon.green  { color:#2fdc7b; }
+.action-row {
+    display: flex;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.btn-secondary {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #dffaff;
+    background: linear-gradient(180deg, #1b2b55, #0b1430);
+    box-shadow: inset 0 0 0 1px rgba(120,180,255,0.25);
+}
+
+.btn-secondary:hover {
+    filter: brightness(1.08);
+}
+
+.btn-secondary.danger {
+    color: #ffdede;
+    background: linear-gradient(180deg, #3a1a1a, #200909);
+}
+.update-banner {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg,#0b1a35,#050b18);
+  color: #9ff;
+  padding: 14px 18px;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(34,227,255,.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-banner button {
+  background: #22e3ff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+</style>
+</head>
+
+<body>
+<!-- UPDATE BANNER -->
+<div id="update-banner" class="update-banner hidden">
+  🚀 Có bản cập nhật mới
+  <button onclick="applyUpdate()">Cập nhật</button>
+</div>
+<div class="container">
+
+<h2>▲ NGUYÊN LIỆU CẦN</h2>
+
+<!-- KỸ NĂNG -->
+<div class="section">
+<div class="sub-title">Kỹ Năng</div>
+<div class="grid">
+<div class="box">🟡 Vàng<input id="s_gold" class="gold" value="67"></div>
+<div class="box">🟣 Tím<input id="s_purple" class="purple" value="55"></div>
+<div class="box">🔵 Xanh Dương<input id="s_blue" class="blue" value="28"></div>
+<div class="box">🟢 Xanh Lá<input id="s_green" class="green" value="25"></div>
+</div>
+</div>
+
+<!-- VŨ KHÍ -->
+<div class="section">
+<div class="sub-title">Vũ Khí</div>
+<div class="grid">
+<div class="box">🟡 Vàng<input id="w_gold" class="gold" value="20"></div>
+<div class="box">🟣 Tím<input id="w_purple" class="purple" value="6"></div>
+<div class="box">🔵 Xanh Dương<input id="w_blue" class="blue" value="8"></div>
+<div class="box">🟢 Xanh Lá<input id="w_green" class="green" value="6"></div>
+</div>
+</div>
+
+<h2>▼ HIỆN CÓ</h2>
+
+<div class="section">
+<div class="grid">
+<div class="box">🟡 Vàng<input id="h_gold" class="gold" value=""></div>
+<div class="box">🟣 Tím<input id="h_purple" class="purple" value=""></div>
+<div class="box">🔵 Xanh Dương<input id="h_blue" class="blue" value=""></div>
+<div class="box">🟢 Xanh Lá<input id="h_green" class="green" value=""></div>
+</div>
+</div>
+
+<div class="action-row">
+    <button class="btn-secondary" onclick="resetDefault()">🔁 Mặc Định</button>
+    <button class="btn-secondary danger" onclick="clearAllInputs()">🗑 Xóa Hết</button>
+</div>
+
+<button onclick="calculate()">TÍNH TOÁN</button>
+<!-- PROGRESS BAR -->
+<div id="progress-wrap">
+    <div id="progress-text">Hoàn thành: 0%</div>
+    <div class="progress-bar-bg">
+        <div id="progress-bar"></div>
+    </div>
+</div>
+
+<div id="result"></div>
+<!-- BUTTON TOGGLE TEST -->
+<button onclick="toggleTestPanel()" style="margin-bottom:10px">
+    Debug
+</button>
+
+<div id="test-panel" class="hidden">
+    <!-- ===== TEST PANEL (GIỮ NGUYÊN NỘI DUNG BÊN TRONG) ===== -->
+    <div class="section">
+        <div class="sub-title">🧪 Test tự động</div>
+
+        <button onclick="runUITests()">Chạy Test Cố Định</button>
+        <button onclick="runFuzzTest()">Chạy Fuzz Test (Random)</button>
+
+        <div id="test-summary" style="margin-top:10px;font-weight:bold"></div>
+        <div id="test-results" style="margin-top:10px;line-height:1.6"></div>
+    </div>
+</div>
+<div id="app-version" class="version"></div>
+</div>
+
+<script>
+/* =========================================================
+   CORE LOGIC – SINGLE SOURCE OF TRUTH
+   ========================================================= */
+function solveMaterial(need, have) {
+    let done = { gold:0, purple:0, blue:0, green:0 };
+    let remain = { ...have };
+
+    function consume(mat) {
+        if (mat === "gold") {
+            if (remain.gold > 0) { remain.gold--; return true; }
+            if (remain.purple >= 3) { remain.purple -= 3; return true; }
+            if (remain.blue >= 9) { remain.blue -= 9; return true; }
+            if (remain.green >= 27) { remain.green -= 27; return true; }
+            return false;
+        }
+        if (mat === "purple") {
+            if (remain.purple > 0) { remain.purple--; return true; }
+            if (remain.blue >= 3) { remain.blue -= 3; return true; }
+            if (remain.green >= 9) { remain.green -= 9; return true; }
+            return false;
+        }
+        if (mat === "blue") {
+            if (remain.blue > 0) { remain.blue--; return true; }
+            if (remain.green >= 3) { remain.green -= 3; return true; }
+            return false;
+        }
+        if (mat === "green") {
+            if (remain.green > 0) { remain.green--; return true; }
+            return false;
+        }
+    }
+
+    ["gold","purple","blue","green"].forEach(mat => {
+        for (let i = 0; i < need[mat]; i++) {
+            if (consume(mat)) done[mat]++;
+            else break;
+        }
+    });
+
+    let thiếu = {};
+    for (let k in need) {
+        if (done[k] < need[k]) thiếu[k] = need[k] - done[k];
+    }
+
+    return { done, remain, thiếu };
+}
+
+/* =========================================================
+   MAIN CALCULATE – UI ONLY
+   ========================================================= */
+function calculate() {
+    const need = {
+        gold:(+s_gold.value||0)+(+w_gold.value||0),
+        purple:(+s_purple.value||0)+(+w_purple.value||0),
+        blue:(+s_blue.value||0)+(+w_blue.value||0),
+        green:(+s_green.value||0)+(+w_green.value||0),
+    };
+
+    const have = {
+        gold:+h_gold.value||0,
+        purple:+h_purple.value||0,
+        blue:+h_blue.value||0,
+        green:+h_green.value||0,
+    };
+
+    const { done, remain, thiếu } = solveMaterial(need, have);
+
+    /* ===== PROGRESS ===== */
+    const totalNeed = need.gold + need.purple + need.blue + need.green;
+    const totalDone = done.gold + done.purple + done.blue + done.green;
+    const percent = totalNeed === 0 ? 100 : Math.min(100, Math.floor(totalDone / totalNeed * 100));
+
+    const bar = document.getElementById("progress-bar");
+    const text = document.getElementById("progress-text");
+    bar.style.width = percent + "%";
+    text.innerText = `Hoàn thành: ${percent}%`;
+    bar.classList.toggle("progress-fail", percent < 100);
+
+    /* ===== RESULT ===== */
+    let html = `
+    <b>Hiện đang có:</b><br>
+    <span class="icon gold">●</span>Vàng: <span data-count="${done.gold}">0</span> / ${need.gold}<br>
+    <span class="icon purple">●</span>Tím: <span data-count="${done.purple}">0</span> / ${need.purple}<br>
+    <span class="icon blue">●</span>Xanh Dương: <span data-count="${done.blue}">0</span> / ${need.blue}<br>
+    <span class="icon green">●</span>Xanh Lá: <span data-count="${done.green}">0</span> / ${need.green}<br><br>
+    `;
+
+    if (Object.keys(thiếu).length === 0) {
+        html += `<div class="ok">ĐÃ ĐỦ NGUYÊN LIỆU</div>`;
+    } else {
+        html += `<div class="fail">THIẾU NGUYÊN LIỆU</div>`;
+        for (let k in thiếu) html += `- Thiếu ${thiếu[k]} ${k}<br>`;
+    }
+
+    const dư = [];
+    if (remain.gold > 0) dư.push(`Dư ${remain.gold} Vàng`);
+    if (remain.purple > 0) dư.push(`Dư ${remain.purple} Tím`);
+    if (remain.blue > 0) dư.push(`Dư ${remain.blue} Xanh Dương`);
+    if (remain.green > 0) dư.push(`Dư ${remain.green} Xanh Lá`);
+
+    if (dư.length) html += `<br><div class="extra">DƯ THỪA</div>` + dư.join("<br>");
+
+    const result = document.getElementById("result");
+    result.innerHTML = html;
+
+    /* ===== COUNT UP ===== */
+    result.querySelectorAll("[data-count]").forEach(el => {
+        const target = +el.dataset.count;
+        let cur = 0;
+        const step = Math.max(1, Math.ceil(target / 20));
+        const timer = setInterval(() => {
+            cur += step;
+            if (cur >= target) {
+                el.textContent = target;
+                clearInterval(timer);
+            } else el.textContent = cur;
+        }, 20);
+    });
+
+    /* ===== PULSE ===== */
+    result.classList.remove("animate");
+    void result.offsetWidth;
+    result.classList.add("animate");
+}
+
+/* =========================================================
+   RIPPLE EFFECT
+   ========================================================= */
+document.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", e => {
+        const rect = btn.getBoundingClientRect();
+        const circle = document.createElement("span");
+        const d = Math.max(btn.clientWidth, btn.clientHeight);
+        const r = d / 2;
+        circle.style.width = circle.style.height = d + "px";
+        circle.style.left = e.clientX - rect.left - r + "px";
+        circle.style.top = e.clientY - rect.top - r + "px";
+        circle.className = "ripple";
+        btn.querySelector(".ripple")?.remove();
+        btn.appendChild(circle);
+    });
+});
+
+/* =========================================================
+   TEST UI + FUZZ
+   ========================================================= */
+function runUITests() {
+    const cases = [
+        { name:"27 green → 1 gold", need:{gold:1,purple:0,blue:0,green:0}, have:{gold:0,purple:0,blue:0,green:27}, exp:{gold:1,purple:0,blue:0,green:0} },
+        { name:"No reverse", need:{gold:0,purple:0,blue:0,green:1}, have:{gold:0,purple:0,blue:9999,green:0}, exp:{gold:0,purple:0,blue:0,green:0} },
+        { name:"Hard case", need:{gold:1,purple:1,blue:1,green:1}, have:{gold:0,purple:0,blue:9999,green:0}, exp:{gold:1,purple:1,blue:1,green:0} },
+    ];
+
+    let pass = 0;
+    let html = "";
+
+    cases.forEach(tc => {
+        const r = solveMaterial(tc.need, tc.have);
+        const ok = JSON.stringify(r.done) === JSON.stringify(tc.exp);
+        if (ok) pass++;
+        html += `<div class="test-case ${ok?"test-pass":"test-fail"}">
+            ${ok?"✅ PASS":"❌ FAIL"} – ${tc.name}
+        </div>`;
+    });
+
+    document.getElementById("test-summary").innerText =
+        `Kết quả: ${pass}/${cases.length} PASS`;
+    document.getElementById("test-results").innerHTML = html;
+}
+
+function runFuzzTest() {
+    let total = 300, pass = 0;
+
+    for (let i = 0; i < total; i++) {
+        const need = {
+            gold:Math.random()*3|0,
+            purple:Math.random()*3|0,
+            blue:Math.random()*3|0,
+            green:Math.random()*3|0
+        };
+
+        const have = {
+            gold:Math.random()*5|0,
+            purple:Math.random()*10|0,
+            blue:Math.random()*50|0,
+            green:Math.random()*100|0
+        };
+
+        const r = solveMaterial(need, have);
+
+        // Luật cấm ghép ngược
+        if (need.green > 0 && have.green === 0 && r.done.green > 0) continue;
+
+        pass++;
+    }
+
+    document.getElementById("test-summary").innerText =
+        `Fuzz Test: ${pass}/${total} PASS`;
+    document.getElementById("test-results").innerHTML =
+        pass === total
+        ? `<div class="test-pass">✅ Không phát hiện ghép ngược</div>`
+        : `<div class="test-fail">❌ Có lỗi</div>`;
+}
+
+function toggleTestPanel() {
+    document.getElementById("test-panel").classList.toggle("hidden");
+}
+
+let waitingSW = null;
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").then(reg => {
+
+      // Nếu đã có SW mới chờ sẵn
+      if (reg.waiting) showUpdateBanner(reg);
+
+      // Khi phát hiện SW mới
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            showUpdateBanner(reg);
+          }
+        });
+      });
+    });
+  });
+
+  // Khi SW mới chiếm quyền → reload
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    window.location.reload();
+  });
+}
+
+function showUpdateBanner(reg) {
+  waitingSW = reg.waiting;
+  document.getElementById("update-banner").classList.remove("hidden");
+}
+
+function applyUpdate() {
+  if (waitingSW) {
+    waitingSW.postMessage({ type: "SKIP_WAITING" });
+  }
+}
+
+const DEFAULT_VALUES = {
+    s_gold: 67,
+    s_purple: 55,
+    s_blue: 28,
+    s_green: 25,
+
+    w_gold: 20,
+    w_purple: 6,
+    w_blue: 8,
+    w_green: 6,
+
+    h_gold: "",
+    h_purple: "",
+    h_blue: "",
+    h_green: ""
+};
+function resetDefault() {
+    for (const id in DEFAULT_VALUES) {
+        const el = document.getElementById(id);
+        if (el) el.value = DEFAULT_VALUES[id];
+    }
+}
+function clearAllInputs() {
+    document.querySelectorAll("input").forEach(input => {
+        input.value = "";
+    });
+}
+const version = document
+  .querySelector('meta[name="app-version"]')
+  .getAttribute("content");
+
+document.getElementById("app-version").innerText =
+  `Phiên bản: v${version}`;
+
+</script>
+
+</body>
+</html>
