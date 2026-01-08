@@ -665,6 +665,47 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+<script>
+/* =========================================================
+   🔥 SAFE SERVICE WORKER RESET (ONLY WITH ?reset)
+   ========================================================= */
+(async function resetPWAIfRequested() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has("reset")) return;
+
+  if (!("serviceWorker" in navigator)) return;
+
+  console.warn("🧹 PWA RESET MODE ENABLED");
+
+  // 1️⃣ Unregister all Service Workers
+  const regs = await navigator.serviceWorker.getRegistrations();
+  for (const reg of regs) {
+    console.warn("❌ Unregister SW:", reg.scope);
+    await reg.unregister();
+  }
+
+  // 2️⃣ Clear all caches
+  if ("caches" in window) {
+    const keys = await caches.keys();
+    for (const key of keys) {
+      console.warn("🗑 Delete cache:", key);
+      await caches.delete(key);
+    }
+  }
+
+  console.warn("✅ PWA RESET DONE");
+
+  // 3️⃣ Reload WITHOUT ?reset
+  params.delete("reset");
+  const cleanUrl =
+    location.pathname +
+    (params.toString() ? "?" + params.toString() : "");
+
+  setTimeout(() => {
+    location.replace(cleanUrl);
+  }, 300);
+})();
+</script>
 
 </body>
 </html>
