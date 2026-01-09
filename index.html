@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta name="app-version" content="1.0.5">
+<meta name="app-version" content="1.0.6">
 <!-- iOS PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -339,6 +339,87 @@ button:hover {
     gap: 10px;
   }
 }
+/* =========================================================
+   SECTION TOGGLE
+   ========================================================= */
+.section-disabled {
+  display: none;
+}
+
+h2 label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+h2 input[type="checkbox"] {
+  transform: scale(1.2);
+}
+/* =========================================================
+   SECTION TOGGLE – GAME STYLE
+   ========================================================= */
+.section-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+/* Ẩn checkbox gốc */
+.section-toggle input {
+  display: none;
+}
+
+/* Thanh toggle */
+.toggle-ui {
+  width: 46px;
+  height: 24px;
+  background: rgba(255,255,255,.15);
+  border-radius: 999px;
+  position: relative;
+  transition: background .25s ease, box-shadow .25s ease;
+  box-shadow: inset 0 0 0 1px rgba(120,180,255,.25);
+}
+
+/* Nút tròn */
+.toggle-ui::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg,#e0f6ff,#8ad8ff);
+  border-radius: 50%;
+  transition: transform .25s ease;
+  box-shadow: 0 0 6px rgba(100,200,255,.6);
+}
+
+/* BẬT */
+.section-toggle input:checked + .toggle-ui {
+  background: linear-gradient(135deg,#22e3ff,#2fdc7b);
+  box-shadow: 0 0 12px rgba(34,227,255,.8);
+}
+
+.section-toggle input:checked + .toggle-ui::after {
+  transform: translateX(22px);
+}
+
+/* Text */
+.toggle-text {
+  color: var(--sub);
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.section-toggle:hover .toggle-ui {
+  filter: brightness(1.1);
+}
 
 </style>
 
@@ -350,24 +431,38 @@ button:hover {
 <h2>▲ NGUYÊN LIỆU CẦN</h2>
 <!-- KỸ NĂNG -->
 <div class="section">
-<div class="sub-title">Kỹ Năng</div>
-<div class="grid">
-<div class="box">🟡 Vàng<input id="s_gold" class="gold" value="67"></div>
-<div class="box">🟣 Tím<input id="s_purple" class="purple" value="55"></div>
-<div class="box">🔵 Xanh Dương<input id="s_blue" class="blue" value="28"></div>
-<div class="box">🟢 Xanh Lá<input id="s_green" class="green" value="25"></div>
-</div>
+	<div class="sub-title">
+		<label class="section-toggle">
+			<input type="checkbox" id="toggle-skill" checked>
+			<span class="toggle-ui"></span>
+			<span class="toggle-text">Kỹ Năng</span>
+		</label>
+	</div>
+	
+	<div class="grid" id="skill-section">
+		<div class="box">🟡 Vàng<input id="s_gold" class="gold" value="67"></div>
+		<div class="box">🟣 Tím<input id="s_purple" class="purple" value="55"></div>
+		<div class="box">🔵 Xanh Dương<input id="s_blue" class="blue" value="28"></div>
+		<div class="box">🟢 Xanh Lá<input id="s_green" class="green" value="25"></div>
+	</div>
 </div>
 
 <!-- VŨ KHÍ -->
 <div class="section">
-<div class="sub-title">Vũ Khí</div>
-<div class="grid">
-<div class="box">🟡 Vàng<input id="w_gold" class="gold" value="20"></div>
-<div class="box">🟣 Tím<input id="w_purple" class="purple" value="6"></div>
-<div class="box">🔵 Xanh Dương<input id="w_blue" class="blue" value="8"></div>
-<div class="box">🟢 Xanh Lá<input id="w_green" class="green" value="6"></div>
-</div>
+	<div class="sub-title">
+		<label class="section-toggle">
+			<input type="checkbox" id="toggle-weapon" checked>
+			<span class="toggle-ui"></span>
+			<span class="toggle-text">VŨ KHÍ</span>
+		</label>
+	</div>
+	
+	<div class="grid" id="weapon-section">
+		<div class="box">🟡 Vàng<input id="w_gold" class="gold" value="20"></div>
+		<div class="box">🟣 Tím<input id="w_purple" class="purple" value="6"></div>
+		<div class="box">🔵 Xanh Dương<input id="w_blue" class="blue" value="8"></div>
+		<div class="box">🟢 Xanh Lá<input id="w_green" class="green" value="6"></div>
+	</div>
 </div>
 
 <h2>▼ HIỆN CÓ</h2>
@@ -798,6 +893,44 @@ if ("serviceWorker" in navigator) {
     location.replace(cleanUrl);
   }, 300);
 })();
+
+/* =========================================================
+   TOGGLE SKILL / WEAPON SECTION
+   ========================================================= */
+function toggleSection(toggleId, sectionId, inputPrefix) {
+  const toggle = document.getElementById(toggleId);
+  const section = document.getElementById(sectionId);
+  const inputs = section.querySelectorAll("input");
+
+  // Lưu giá trị gốc
+  inputs.forEach(i => {
+    if (!i.dataset.lastValue) {
+      i.dataset.lastValue = i.value;
+    }
+  });
+
+  toggle.addEventListener("change", () => {
+    if (!toggle.checked) {
+      // Tắt section
+      section.classList.add("section-disabled");
+      inputs.forEach(i => {
+        i.dataset.lastValue = i.value;
+        i.value = 0;
+      });
+    } else {
+      // Bật lại section
+      section.classList.remove("section-disabled");
+      inputs.forEach(i => {
+        i.value = i.dataset.lastValue || 0;
+      });
+    }
+  });
+}
+
+// Áp dụng
+toggleSection("toggle-skill", "skill-section");
+toggleSection("toggle-weapon", "weapon-section");
+
 </script>
 
 </body>
